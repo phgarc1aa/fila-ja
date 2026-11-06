@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar à fila | Fila Já</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container cadastro-fila-page">
+
+    <!-- Cabeçalho -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>Adicionar à fila</h1>
+            <p>Preencha os dados para inserir um paciente na fila de atendimento.</p>
+        </div>
+
+        <a th:href="@{/}" class="page-btn page-btn-secondary">
+            Voltar ao painel
+        </a>
+    </div>
+
+    <!-- Formulário -->
+    <div class="cadastro-fila-card">
+
+        <form th:action="@{/fila/salvar}" method="post">
+
+            <div class="cadastro-fila-field">
+                <label for="idPaciente">Paciente</label>
+
+                <select id="idPaciente" name="idPaciente" required>
+                    <option value="">Selecione um paciente</option>
+
+                    <option th:each="paciente : ${pacientes}"
+                            th:value="${paciente.id_paciente}"
+                            th:text="${paciente.nome + ' - CPF: ' + paciente.cpf}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="cadastro-fila-field">
+                <label for="idUbs">Unidade de saúde</label>
+
+                <select id="idUbs" name="idUbs" required>
+                    <option value="">Selecione uma UBS</option>
+
+                    <option th:each="unidade : ${ubs}"
+                            th:value="${unidade.id_ubs}"
+                            th:text="${unidade.nome}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="cadastro-fila-field">
+                <label for="idServico">Serviço</label>
+
+                <select id="idServico" name="idServico" required>
+                    <option value="">Selecione um serviço</option>
+
+                    <option th:each="servico : ${servicos}"
+                            th:value="${servico.id_servico}"
+                            th:text="${servico.nome}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- Botões -->
+            <div class="cadastro-fila-actions">
+
+                <a th:href="@{/fila}" class="cadastro-fila-cancelar">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="cadastro-fila-submit">
+                    Adicionar à fila
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

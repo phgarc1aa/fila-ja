@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento da Fila | Fila Já</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Cabeçalho -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>Gerenciamento da Fila</h1>
+            <p>Acompanhe os pacientes e gerencie os atendimentos.</p>
+        </div>
+
+        <a th:href="@{/}" class="page-btn page-btn-secondary">
+            Voltar ao painel
+        </a>
+    </div>
+
+    <!-- Ações -->
+    <div class="acoes-fila">
+
+        <a th:href="@{/fila/novo}" class="btn btn-primary">
+            + Adicionar à fila
+        </a>
+
+        <a th:href="@{/fila/historico}" class="btn">
+            Histórico de atendimentos
+        </a>
+
+    </div>
+
+    <!-- Indicadores da fila -->
+    <div class="fila-stats">
+
+        <div class="fila-stat-card">
+            <span class="fila-stat-icon blue">👥</span>
+            <div>
+                <p>Total de pacientes</p>
+                <strong th:text="${resumo.total}">0</strong>
+            </div>
+        </div>
+
+        <div class="fila-stat-card">
+            <span class="fila-stat-icon orange">⏳</span>
+            <div>
+                <p>Aguardando</p>
+                <strong th:text="${resumo.aguardando}">0</strong>
+            </div>
+        </div>
+
+        <div class="fila-stat-card">
+            <span class="fila-stat-icon purple">🩺</span>
+            <div>
+                <p>Em atendimento</p>
+                <strong th:text="${resumo.em_atendimento}">0</strong>
+            </div>
+        </div>
+
+        <div class="fila-stat-card">
+            <span class="fila-stat-icon green">✓</span>
+            <div>
+                <p>Finalizados</p>
+                <strong th:text="${resumo.finalizados}">0</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div class="alerta-fila"
+         th:if="${erroFila}"
+         th:text="${erroFila}">
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-container">
+
+        <table>
+            <thead>
+            <tr>
+                <th>Senha</th>
+                <th>Paciente</th>
+                <th>UBS</th>
+                <th>Serviço</th>
+                <th>Horário</th>
+                <th>Tempo de espera</th>
+                <th>Aguardando no serviço</th>
+                <th>Status</th>
+                <th>Ação</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="item : ${filas}">
+
+                <td>
+                    <strong th:text="${item.senha}"></strong>
+                </td>
+
+                <td th:text="${item.paciente}"></td>
+
+                <td th:text="${item.ubs}"></td>
+
+                <td th:text="${item.servico}"></td>
+
+                <td th:text="${item.horario}"></td>
+
+                <td>
+                    <span th:if="${item.status != 'FINALIZADO' and item.status != 'CANCELADO'}"
+                          th:text="${item.tempo_espera_minutos + ' min'}">
+                    </span>
+
+                    <span th:if="${item.status == 'FINALIZADO' or item.status == 'CANCELADO'}">
+                        —
+                    </span>
+                </td>
+
+                <td>
+                    <strong th:text="${item.total_aguardando_servico}">0</strong>
+                    pacientes
+                </td>
+
+                <td>
+                    <span class="badge"
+                          th:classappend="
+                          ${item.status == 'AGUARDANDO'} ? ' waiting' :
+                          (${item.status == 'CHAMADO'} ? ' called' :
+                          (${item.status == 'EM_ATENDIMENTO'} ? ' in-progress' :
+                          (${item.status == 'FINALIZADO'} ? ' finished' :
+                          (${item.status == 'CANCELADO'} ? ' cancelled' : ''))))"
+                          th:text="${item.status}">
+                    </span>
+                </td>
+
+                <td>
+
+                    <!-- Chamar paciente -->
+                    <form th:if="${item.status == 'AGUARDANDO'}"
+                          th:action="@{/fila/chamar}"
+                          method="post">
+
+                        <input type="hidden" name="idUbs"
+                               th:value="${item.id_ubs}">
+
+                        <input type="hidden" name="idServico"
+                               th:value="${item.id_servico}">
+
+                        <button type="submit" class="btn-iniciar">
+                            Chamar próximo
+                        </button>
+                    </form>
+
+                    <!-- Iniciar atendimento -->
+                    <form th:if="${item.status == 'CHAMADO'}"
+                          th:action="@{/fila/iniciar}"
+                          method="post">
+
+                        <input type="hidden" name="idFila"
+                               th:value="${item.id_fila}">
+
+                        <button type="submit" class="btn-iniciar">
+                            Iniciar atendimento
+                        </button>
+                    </form>
+
+                    <!-- Finalizar atendimento -->
+                    <form th:if="${item.status == 'EM_ATENDIMENTO'}"
+                          th:action="@{/fila/finalizar}"
+                          method="post">
+
+                        <input type="hidden" name="idFila"
+                               th:value="${item.id_fila}">
+
+                        <button type="submit" class="btn-finalizar">
+                            Finalizar atendimento
+                        </button>
+                    </form>
+
+                    <!-- Atendimento encerrado -->
+                    <span th:if="${item.status == 'FINALIZADO' or item.status == 'CANCELADO'}">
+                        —
+                    </span>
+
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(filas)}">
+                <td colspan="9">Nenhum paciente encontrado na fila.</td>
+            </tr>
+
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

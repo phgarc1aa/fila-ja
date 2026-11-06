@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Atendimentos | Fila Já</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container historico-page">
+
+    <!-- Cabeçalho -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>Histórico de Atendimentos</h1>
+            <p>Consulte os atendimentos realizados nas unidades de saúde.</p>
+        </div>
+
+        <a th:href="@{/}" class="page-btn page-btn-secondary">
+            Voltar ao painel
+        </a>
+    </div>
+
+    <!-- Ações -->
+    <div class="acoes-fila">
+        <a th:href="@{/fila}" class="btn">
+            Voltar à fila
+        </a>
+    </div>
+
+    <!-- Indicador -->
+    <div class="fila-stats">
+
+        <div class="fila-stat-card">
+            <span class="fila-stat-icon blue">📋</span>
+            <div>
+                <p>Total de atendimentos</p>
+                <strong th:text="${#lists.size(atendimentos)}">0</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>UBS</th>
+                <th>Serviço</th>
+                <th>Profissional</th>
+                <th>Início</th>
+                <th>Finalização</th>
+                <th>Observações</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="item : ${atendimentos}">
+
+                <td th:text="${item.paciente}"></td>
+
+                <td th:text="${item.ubs}"></td>
+
+                <td th:text="${item.servico}"></td>
+
+                <td th:text="${item.profissional}"></td>
+
+                <td th:text="${item.data_inicio != null ? #temporals.format(item.data_inicio, 'dd/MM/yyyy HH:mm') : '—'}"></td>
+
+                <td th:text="${item.data_fim != null ? #temporals.format(item.data_fim, 'dd/MM/yyyy HH:mm') : 'Em andamento'}"></td>
+
+                <td th:text="${item.observacoes != null and !#strings.isEmpty(item.observacoes) ? item.observacoes : '—'}"></td>
+
+                <td>
+                    <span class="badge"
+                          th:classappend="${item.data_fim != null} ? ' finished' : ' in-progress'"
+                          th:text="${item.data_fim != null ? 'FINALIZADO' : 'EM ANDAMENTO'}">
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(atendimentos)}">
+                <td colspan="8">Nenhum atendimento registrado.</td>
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

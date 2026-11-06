@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fila Já | Painel</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">F</div>
+            <div>
+                <h2>Fila Já</h2>
+                <span>Gestão de atendimento</span>
+            </div>
+        </div>
+
+        <div class="menu-label">MENU PRINCIPAL</div>
+
+        <nav>
+            <a href="/" class="menu-item active">▦ <span>Painel</span></a>
+            <a th:href="@{/pacientes}" class="menu-item">♙ <span>Pacientes</span></a>
+            <a th:href="@{/fila}" class="menu-item">☷ <span>Gerenciar fila</span></a>
+            <a th:href="@{/fila/historico}" class="menu-item">✚ <span>Atendimentos</span></a>
+            <a th:href="@{/ubs}" class="menu-item">⌂ <span>Unidades de saúde</span></a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="profile">
+                <div class="avatar">A</div>
+                <div>
+                    <strong>Administrador</strong>
+                    <span>Administrador do sistema</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <span class="breadcrumb">Página inicial / Painel</span>
+                <h1>Painel geral</h1>
+            </div>
+
+            <div class="topbar-right">
+                <span class="status"><span></span> Sistema operacional</span>
+                <div class="avatar">A</div>
+            </div>
+        </header>
+
+        <section class="welcome">
+            <div>
+                <span class="welcome-tag">FILA JÁ</span>
+                <h2>Bem-vindo ao painel!</h2>
+                <p>Acompanhe os atendimentos e gerencie as filas da sua unidade de saúde.</p>
+            </div>
+            <div class="welcome-icon">✚</div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <h2>Visão geral</h2>
+                    <p>Resumo dos registros de atendimento</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+
+                <article class="stat-card">
+                    <div class="stat-icon blue">☷</div>
+                    <span>Pacientes aguardando</span>
+                    <strong th:text="${aguardando}">0</strong>
+                    <small>Na fila de atendimento</small>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-icon orange">◷</div>
+                    <span>Em atendimento</span>
+                    <strong th:text="${emAtendimento}">0</strong>
+                    <small>Atendimentos em andamento</small>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-icon green">✓</div>
+                    <span>Finalizados</span>
+                    <strong th:text="${finalizados}">0</strong>
+                    <small>Atendimentos concluídos</small>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-icon purple">♙</div>
+                    <span>Total de senhas</span>
+                    <strong th:text="${total}">0</strong>
+                    <small>Registros na fila</small>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <h2>Senhas recentes</h2>
+                    <p>Acompanhe os últimos registros da fila</p>
+                </div>
+                <a th:href="@{/fila}" class="view-all">Ver todos →</a>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Senha</th>
+                        <th>Paciente</th>
+                        <th>Serviço</th>
+                        <th>Horário</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="fila : ${ultimasFilas}">
+                        <td>
+                            <strong th:text="${fila.senha}">A001</strong>
+                        </td>
+
+                        <td th:text="${fila.paciente}">João Silva</td>
+
+                        <td th:text="${fila.servico}">Clínica Geral</td>
+
+                        <td th:text="${fila.horario}">
+                            08:15
+                        </td>
+
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${fila.status == 'FINALIZADO' ? ' finished' :
+                                  fila.status == 'CHAMADO' ? ' called' :
+                                  fila.status == 'AGUARDANDO' ? ' waiting' :
+                                  fila.status == 'EM_ATENDIMENTO' ? ' in-service' :
+                                  ' cancelled'}"
+                                  th:text="${fila.status == 'FINALIZADO' ? 'Finalizado' :
+                                  fila.status == 'CHAMADO' ? 'Chamado' :
+                                  fila.status == 'AGUARDANDO' ? 'Aguardando' :
+                                  fila.status == 'EM_ATENDIMENTO' ? 'Em atendimento' :
+                                  'Cancelado'}">
+                                Aguardando
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(ultimasFilas)}">
+                        <td colspan="5" style="text-align: center;">
+                            Nenhum registro encontrado.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <footer>
+            Fila Já © 2026 — Sistema de gerenciamento de filas de atendimento.
+        </footer>
+
+    </main>
+</div>
+
+</body>
+</html>

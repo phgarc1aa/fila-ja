@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacientes | Fila Já</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1>Pacientes</h1>
+            <p>Gerenciamento de pacientes cadastrados no sistema.</p>
+        </div>
+
+        <a th:href="@{/}" class="page-btn page-btn-secondary">
+            Voltar ao painel
+        </a>
+    </div>
+
+    <div class="page-actions">
+        <a th:href="@{/pacientes/novo}" class="page-btn page-btn-primary">
+            + Novo paciente
+        </a>
+    </div>
+
+    <div class="table-container">
+
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Data de nascimento</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="paciente : ${pacientes}">
+                <td th:text="${paciente.id_paciente}"></td>
+                <td th:text="${paciente.nome}"></td>
+                <td th:text="${paciente.cpf}"></td>
+                <td th:text="${paciente.data_nascimento}"></td>
+                <td th:text="${paciente.telefone}"></td>
+                <td th:text="${paciente.email}"></td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(pacientes)}">
+                <td colspan="6">Nenhum paciente cadastrado.</td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>

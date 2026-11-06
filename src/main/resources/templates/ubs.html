@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unidades de Saúde | Fila Já</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<main class="main-content">
+
+    <section class="ubs-page">
+
+        <!-- CABEÇALHO -->
+        <header class="ubs-header">
+
+            <div>
+                <h1>Unidades de Saúde</h1>
+                <p>Gerencie as unidades cadastradas no sistema.</p>
+            </div>
+
+            <a th:href="@{/}" class="ubs-btn-back">
+                ← Voltar ao painel
+            </a>
+
+        </header>
+
+        <!-- MENSAGENS -->
+        <div th:if="${sucesso}" class="alert alert-success"
+             th:text="${sucesso}">
+        </div>
+
+        <div th:if="${erro}" class="alert alert-danger"
+             th:text="${erro}">
+        </div>
+
+        <!-- INDICADORES -->
+        <div class="ubs-stats">
+
+            <div class="ubs-stat-card">
+                <div>
+                    <span>Total de unidades</span>
+                    <h2 th:text="${#lists.size(unidades)}">0</h2>
+                </div>
+                <div class="stat-icon blue">⌂</div>
+            </div>
+
+            <div class="ubs-stat-card">
+                <div>
+                    <span>Unidades ativas</span>
+                    <h2 th:text="${#lists.size(unidades.?[ativo == 1])}">0</h2>
+                </div>
+                <div class="stat-icon green">✓</div>
+            </div>
+
+            <div class="ubs-stat-card">
+                <div>
+                    <span>Unidades inativas</span>
+                    <h2 th:text="${#lists.size(unidades.?[ativo == 0])}">0</h2>
+                </div>
+                <div class="stat-icon orange">!</div>
+            </div>
+
+        </div>
+
+        <!-- LISTAGEM -->
+        <div class="ubs-section-header">
+
+            <div>
+                <h3>Unidades cadastradas</h3>
+                <p>Visualize e gerencie as unidades de saúde.</p>
+            </div>
+
+            <button type="button"
+                    class="ubs-btn-primary"
+                    onclick="abrirModal()">
+                + Nova unidade
+            </button>
+
+        </div>
+
+        <!-- TABELA -->
+        <div class="ubs-table-container">
+
+            <table class="ubs-table">
+
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Unidade de saúde</th>
+                    <th>Endereço</th>
+                    <th>Telefone</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="unidade : ${unidades}">
+
+                    <td th:text="${unidade.id_ubs}">1</td>
+
+                    <td>
+                        <div class="ubs-name">
+                            <div class="ubs-avatar">⌂</div>
+                            <strong th:text="${unidade.nome}">UBS Central</strong>
+                        </div>
+                    </td>
+
+                    <td th:text="${unidade.endereco}">Endereço</td>
+
+                    <td th:text="${unidade.telefone != null && !unidade.telefone.isEmpty()
+                        ? unidade.telefone : 'Não informado'}">
+                        Não informado
+                    </td>
+
+                    <!-- STATUS -->
+                    <td>
+
+                        <span th:if="${unidade.ativo == 1}"
+                              class="ubs-status active">
+                            Ativa
+                        </span>
+
+                        <span th:if="${unidade.ativo == 0}"
+                              class="ubs-status inactive">
+                            Inativa
+                        </span>
+
+                    </td>
+
+                    <!-- AÇÕES -->
+                    <td>
+                        <div class="ubs-actions">
+
+                            <!-- EDITAR -->
+                            <button type="button"
+                                    class="ubs-btn-edit"
+                                    title="Editar"
+                                    th:attr="data-id=${unidade.id_ubs},
+                                             data-nome=${unidade.nome},
+                                             data-endereco=${unidade.endereco},
+                                             data-telefone=${unidade.telefone}"
+                                    onclick="abrirModalEdicao(this)">
+                                ✎
+                            </button>
+
+                            <!-- ALTERAR STATUS -->
+                            <form th:action="@{/ubs/alterar-status}" method="post">
+
+                                <input type="hidden"
+                                       name="idUbs"
+                                       th:value="${unidade.id_ubs}">
+
+                                <button type="submit"
+                                        class="ubs-btn-toggle"
+                                        th:title="${unidade.ativo == 1 ? 'Desativar unidade' : 'Ativar unidade'}"
+                                        th:text="${unidade.ativo == 1 ? '⏸' : '✓'}">
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </td>
+
+                </tr>
+
+                <!-- LISTA VAZIA -->
+                <tr th:if="${#lists.isEmpty(unidades)}">
+                    <td colspan="6" class="ubs-empty">
+                        Nenhuma unidade de saúde cadastrada.
+                    </td>
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- MODAL DE CADASTRO -->
+<div class="ubs-modal-overlay" id="modalUbs">
+
+    <div class="ubs-modal">
+
+        <div class="ubs-modal-header">
+
+            <div>
+                <h3>Nova unidade de saúde</h3>
+                <p>Preencha os dados para cadastrar uma unidade.</p>
+            </div>
+
+            <button type="button"
+                    class="ubs-modal-close"
+                    onclick="fecharModal()">
+                ×
+            </button>
+
+        </div>
+
+        <form th:action="@{/ubs/salvar}" method="post">
+
+            <div class="ubs-form-group">
+                <label for="nome">Nome da unidade</label>
+                <input type="text"
+                       id="nome"
+                       name="nome"
+                       placeholder="Ex.: UBS Central"
+                       maxlength="100"
+                       required>
+            </div>
+
+            <div class="ubs-form-group">
+                <label for="endereco">Endereço</label>
+                <input type="text"
+                       id="endereco"
+                       name="endereco"
+                       placeholder="Digite o endereço completo"
+                       maxlength="200"
+                       required>
+            </div>
+
+            <div class="ubs-form-group">
+                <label for="telefone">Telefone</label>
+                <input type="text"
+                       id="telefone"
+                       name="telefone"
+                       placeholder="(61) 99999-9999"
+                       maxlength="20">
+            </div>
+
+            <div class="ubs-modal-actions">
+
+                <button type="button"
+                        class="ubs-btn-cancel"
+                        onclick="fecharModal()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="ubs-btn-primary">
+                    Cadastrar unidade
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL DE EDIÇÃO -->
+<div class="ubs-modal-overlay" id="modalEditarUbs">
+
+    <div class="ubs-modal">
+
+        <div class="ubs-modal-header">
+
+            <div>
+                <h3>Editar unidade de saúde</h3>
+                <p>Altere os dados da unidade cadastrada.</p>
+            </div>
+
+            <button type="button"
+                    class="ubs-modal-close"
+                    onclick="fecharModalEdicao()">
+                ×
+            </button>
+
+        </div>
+
+        <form th:action="@{/ubs/editar}" method="post">
+
+            <input type="hidden" id="editarIdUbs" name="idUbs">
+
+            <div class="ubs-form-group">
+                <label for="editarNome">Nome da unidade</label>
+                <input type="text"
+                       id="editarNome"
+                       name="nome"
+                       maxlength="100"
+                       required>
+            </div>
+
+            <div class="ubs-form-group">
+                <label for="editarEndereco">Endereço</label>
+                <input type="text"
+                       id="editarEndereco"
+                       name="endereco"
+                       maxlength="200"
+                       required>
+            </div>
+
+            <div class="ubs-form-group">
+                <label for="editarTelefone">Telefone</label>
+                <input type="text"
+                       id="editarTelefone"
+                       name="telefone"
+                       maxlength="20">
+            </div>
+
+            <div class="ubs-modal-actions">
+
+                <button type="button"
+                        class="ubs-btn-cancel"
+                        onclick="fecharModalEdicao()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="ubs-btn-primary">
+                    Salvar alterações
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // MODAL DE CADASTRO
+    function abrirModal() {
+        document.getElementById("modalUbs").classList.add("show");
+    }
+
+    function fecharModal() {
+        document.getElementById("modalUbs").classList.remove("show");
+    }
+
+
+    // MODAL DE EDIÇÃO
+    function abrirModalEdicao(botao) {
+
+        document.getElementById("editarIdUbs").value =
+            botao.getAttribute("data-id");
+
+        document.getElementById("editarNome").value =
+            botao.getAttribute("data-nome");
+
+        document.getElementById("editarEndereco").value =
+            botao.getAttribute("data-endereco");
+
+        document.getElementById("editarTelefone").value =
+            botao.getAttribute("data-telefone") || "";
+
+        document.getElementById("modalEditarUbs").classList.add("show");
+    }
+
+    function fecharModalEdicao() {
+        document.getElementById("modalEditarUbs").classList.remove("show");
+    }
+
+
+    // FECHAR MODAIS AO CLICAR FORA
+    document.getElementById("modalUbs").addEventListener("click", function(event) {
+        if (event.target === this) {
+            fecharModal();
+        }
+    });
+
+    document.getElementById("modalEditarUbs").addEventListener("click", function(event) {
+        if (event.target === this) {
+            fecharModalEdicao();
+        }
+    });
+
+</script>
+
+</body>
+</html>
