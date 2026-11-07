@@ -1,0 +1,18 @@
+USE fila_ja;
+
+-- TESTE 1: VISUALIZAR A FILA
+
+SELECT *
+FROM vw_fila_atendimento;
+
+
+-- TESTE 2: VISUALIZAR OS ATENDIMENTOS
+
+SELECT *
+FROM vw_atendimentos;
+
+
+-- TESTE 3: CONFERIR AS VIEWS CRIADAS
+
+SHOW FULL TABLES
+WHERE Table_type = 'VIEW';

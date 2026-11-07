@@ -1,9 +1,10 @@
-# Maven
-target/
+﻿# Java e Maven
+**/target/
 *.class
 
 # IntelliJ IDEA
 .idea/
+**/.idea/
 *.iml
 
 # VS Code
@@ -13,4 +14,8 @@ target/
 *.log
 
 # Credenciais
-src/main/resources/application.properties
+**/application.properties
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db

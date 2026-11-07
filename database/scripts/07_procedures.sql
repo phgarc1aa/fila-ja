@@ -1,0 +1,18 @@
+USE fila_ja;
+
+-- TESTE 1: CONFERIR AS PROCEDURES
+
+SHOW PROCEDURE STATUS
+WHERE Db = 'fila_ja';
+
+
+-- TESTE 2: CONSULTAR A FILA
+
+SELECT *
+FROM vw_fila_atendimento;
+
+
+-- TESTE 3: CONSULTAR OS ATENDIMENTOS
+
+SELECT *
+FROM vw_atendimentos;
