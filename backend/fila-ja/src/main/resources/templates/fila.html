@@ -74,6 +74,12 @@
 
     </div>
 
+    <!-- Mensagem de sucesso -->
+    <div class="alerta-sucesso"
+         th:if="${sucesso}"
+         th:text="${sucesso}">
+    </div>
+
     <!-- Mensagem de erro -->
     <div class="alerta-fila"
          th:if="${erroFila}"

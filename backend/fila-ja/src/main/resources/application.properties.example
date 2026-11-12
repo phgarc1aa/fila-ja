@@ -1,0 +1,9 @@
+# Copie este arquivo para application.properties (que está no .gitignore) e ajuste a senha.
+# A aplicação conecta com o usuário limitado "atendente_fila" criado em
+# database/scripts/08_usuarios_permissoes.sql. NUNCA use o usuário root aqui.
+spring.application.name=fila-ja
+
+spring.datasource.url=jdbc:mysql://localhost:3306/fila_ja?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
+spring.datasource.username=atendente_fila
+spring.datasource.password=Atd!Fila#2026
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver

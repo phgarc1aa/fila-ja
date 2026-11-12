@@ -1,11 +1,15 @@
 package br.com.filaja.controller;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.sql.SQLException;
+import java.sql.Types;
 
 @Controller
 @RequestMapping("/fila")
@@ -98,7 +102,8 @@ public class FilaController {
     public String salvar(
             @RequestParam Integer idPaciente,
             @RequestParam Integer idUbs,
-            @RequestParam Integer idServico
+            @RequestParam Integer idServico,
+            RedirectAttributes redirectAttributes
     ) {
 
         Integer idUsuario = jdbcTemplate.queryForObject(
@@ -107,49 +112,32 @@ public class FilaController {
                 "atendente@filaja.com"
         );
 
-        Integer idFila = jdbcTemplate.queryForObject(
-                "SELECT gerar_id('fila')",
-                Integer.class
-        );
+        try {
+            // Geração de ID/senha e INSERT acontecem dentro da procedure,
+            // numa única transação (COMMIT em caso de sucesso, ROLLBACK em erro).
+            String senha = jdbcTemplate.execute(
+                    "{CALL sp_entrar_na_fila(?, ?, ?, ?, ?, ?)}",
+                    (CallableStatementCallback<String>) cs -> {
+                        cs.setInt(1, idPaciente);
+                        cs.setInt(2, idUbs);
+                        cs.setInt(3, idServico);
+                        cs.setInt(4, idUsuario);
+                        cs.registerOutParameter(5, Types.INTEGER);
+                        cs.registerOutParameter(6, Types.VARCHAR);
+                        cs.execute();
+                        return cs.getString(6);
+                    }
+            );
 
-        String prefixo;
+            redirectAttributes.addFlashAttribute(
+                    "sucesso",
+                    "Paciente adicionado à fila. Senha: " + senha
+            );
 
-        if (idUbs == 2) {
-            prefixo = "A";
-        } else if (idUbs == 3) {
-            prefixo = "B";
-        } else {
-            prefixo = "U";
+        } catch (DataAccessException e) {
+
+            redirectAttributes.addFlashAttribute("erroFila", mensagemDoBanco(e));
         }
-
-        Integer numeroSenha = jdbcTemplate.queryForObject("""
-                SELECT COALESCE(
-                    MAX(CAST(SUBSTRING(senha, 2) AS UNSIGNED)), 0
-                ) + 1
-                FROM fila
-                WHERE id_ubs = ?
-                AND senha LIKE ?
-                """,
-                Integer.class,
-                idUbs,
-                prefixo + "%"
-        );
-
-        String senha = prefixo + String.format("%03d", numeroSenha);
-
-        jdbcTemplate.update("""
-                INSERT INTO fila
-                (id_fila, id_paciente, id_ubs, id_servico,
-                 id_usuario, senha, status)
-                VALUES (?, ?, ?, ?, ?, ?, 'AGUARDANDO')
-                """,
-                idFila,
-                idPaciente,
-                idUbs,
-                idServico,
-                idUsuario,
-                senha
-        );
 
         return "redirect:/fila";
     }
@@ -218,12 +206,7 @@ public class FilaController {
 
         } catch (Exception e) {
 
-            redirectAttributes.addFlashAttribute(
-                    "erroFila",
-                    e.getCause() != null
-                            ? e.getCause().getMessage()
-                            : e.getMessage()
-            );
+            redirectAttributes.addFlashAttribute("erroFila", mensagemDoBanco(e));
         }
 
         return "redirect:/fila";
@@ -264,6 +247,23 @@ public class FilaController {
         model.addAttribute("atendimentos", atendimentos);
 
         return "historico";
+    }
+
+
+    /**
+     * Mensagens de regra de negócio vêm do banco via SIGNAL SQLSTATE '45000'
+     * (por exemplo, "Paciente já possui senha ativa neste serviço"). Qualquer
+     * outro erro SQL é tratado como falha genérica, sem expor detalhes técnicos.
+     */
+    private String mensagemDoBanco(Exception e) {
+        Throwable causa = e;
+        while (causa != null) {
+            if (causa instanceof SQLException sql && "45000".equals(sql.getSQLState())) {
+                return sql.getMessage();
+            }
+            causa = causa.getCause();
+        }
+        return "Não foi possível concluir a operação. Tente novamente.";
     }
 
 }

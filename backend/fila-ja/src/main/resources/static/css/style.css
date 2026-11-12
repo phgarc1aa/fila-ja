@@ -856,6 +856,21 @@ footer {
     margin: 20px 0;
 }
 
+.alerta-sucesso {
+    background: var(--success-light);
+    color: var(--success);
+
+    border: 1px solid #b7e4cf;
+    padding: 14px 18px;
+
+    border-radius: 9px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    margin: 20px 0;
+}
+
 /* Botões de ação da fila */
 
 .acoes-fila .btn,
