@@ -1,0 +1,27 @@
+USE fila_ja;
+
+-- TESTE 1: CONFERIR OS TRIGGERS
+
+SHOW TRIGGERS;
+
+
+-- TESTE 2: CONSULTAR O HISTÓRICO DA FILA
+
+SELECT *
+FROM historico_fila
+ORDER BY data_alteracao DESC;
+
+
+-- TESTE 3: CONSULTAR OS ATENDIMENTOS
+
+SELECT *
+FROM vw_atendimentos;
+
+
+-- TESTE 4: CONSULTAR OS STATUS ATUAIS
+
+SELECT
+    id_fila,
+    senha,
+    status
+FROM fila;

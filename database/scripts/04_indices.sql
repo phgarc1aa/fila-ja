@@ -1,15 +1,18 @@
+-- =====================================================================
+-- Fila Já - 04: índices
+-- (PRIMARY KEY, UNIQUE e FOREIGN KEY já criam índices próprios; estes são
+--  índices adicionais, escolhidos pelas consultas mais frequentes.)
+-- =====================================================================
 USE fila_ja;
 
-SHOW INDEX FROM fila;
+-- Consultas de "quem está aguardando neste serviço desta UBS" (sp_chamar_paciente,
+-- fn_contar_fila, validação de chamada no backend): filtram por id_ubs, id_servico
+-- e status, nesta ordem de seletividade/uso. Um índice composto atende o WHERE
+-- inteiro sem ler a tabela inteira.
+CREATE INDEX idx_fila_ubs_servico_status
+    ON fila (id_ubs, id_servico, status);
 
-EXPLAIN
-SELECT id_fila, senha, status
-FROM fila
-WHERE id_ubs = 3
-  AND id_servico = 4
-  AND status = 'AGUARDANDO';
-
-EXPLAIN
-SELECT id_fila, senha, data_entrada
-FROM fila
-ORDER BY data_entrada;
+-- Telas e procedures ordenam a fila por ordem de chegada (ORDER BY data_entrada);
+-- o índice evita a ordenação em disco (filesort) quando a tabela cresce.
+CREATE INDEX idx_fila_data_entrada
+    ON fila (data_entrada);

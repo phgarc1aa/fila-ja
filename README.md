@@ -82,9 +82,24 @@ fila-ja/
 git clone https://github.com/phgarc1aa/fila-ja.git
 ```
 
-2. Configure a conexão com o banco de dados MySQL no arquivo `application.properties`.
+2. Crie o banco (MySQL 8) executando, **como administrador do MySQL**, os scripts de `database/scripts` na ordem:
 
-3. Certifique-se de que o banco de dados e as estruturas necessárias estejam criados.
+```bash
+cd database/scripts
+for f in 01_criacao_tabelas.sql 02_dados_iniciais.sql 03_funcoes.sql 04_indices.sql \
+         05_views.sql 06_triggers.sql 07_procedures.sql 08_usuarios_permissoes.sql; do
+  mysql -u root -p < "$f"
+done
+```
+
+   O `08_usuarios_permissoes.sql` cria os usuários `admin_fila`, `atendente_fila` e
+   `profissional_fila` (troque as senhas se for usar fora de aula).
+   As consultas de verificação e a demonstração de transações (COMMIT/ROLLBACK) estão em `database/testes`.
+   (`database/backup/fila_ja_completo.sql` é um dump antigo e não deve ser usado.)
+
+3. Em `backend/fila-ja/src/main/resources`, copie `application.properties.example` para
+   `application.properties` e confira a senha. A aplicação conecta com o usuário
+   `atendente_fila`; **nunca** com o `root`.
 
 4. Na pasta raiz do projeto, execute:
 
